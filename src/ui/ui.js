@@ -46,6 +46,7 @@ const appCreated = createApp({
             renderEnvChanged: new Subject(),
             addEnvironmentChanged: new Subject(),
             selectedAnimationsChanged: new Subject(),
+            backgroundImageChanged: new Subject(),
             selectedEnvironmentChanged: new Subject(),
 
             validatorChanged: new Subject(),
@@ -160,8 +161,9 @@ const appCreated = createApp({
 
         // test if webgl is present
         const canvas = document.getElementById("canvas");
+        // Enable alpha so CSS background images can show through when the renderer clears with transparency.
         const context = canvas.getContext("webgl2", {
-            alpha: false,
+            alpha: true,
             antialias: true
         });
         if (context === undefined || context === null) {
@@ -405,6 +407,11 @@ const appCreated = createApp({
         onFileChange(e) {
             const file = e.target.files[0];
             this.addEnvironmentChanged.next({ hdr_path: file });
+        },
+
+        onBackgroundChange(e) {
+            const file = e.target.files[0];
+            this.backgroundImageChanged.next({ file: file });
         },
 
         toggleUI() {

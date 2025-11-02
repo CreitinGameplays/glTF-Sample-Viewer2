@@ -264,7 +264,7 @@
                                         v-bind:disabled="ibl === false ? true : false">Blur</b-switch>
                                     <b-field label="Background Color" class="smallerLabel"></b-field>
                                     <b-input type="color" id="clearColorPicker" custom-class="colorInput"
-                                    v-on:input="colorChanged.next($event.target.value)" v-model="clearColor"></b-input>
+                                    v-on:change="colorChanged.next($event.target.value)" v-model="clearColor"></b-input>
                                 </b-field>
                                 <b-field label="Environment Rotation" class="smallerLabel">
                                     <b-select v-on:input="environmentRotationChanged.next($event.target.value)"
@@ -280,6 +280,12 @@
                                         <input class="file-input" type="file" accept=".hdr" @change="onFileChange">
                                         <i class="fas fa-plus"></i>
                                         Add New HDR
+                                    </button>
+                                    <button class="button is-rounded">
+                                        <input class="file-input" type="file" accept=".png, .jpg, .jpeg"
+                                            @change="onBackgroundChange">
+                                        <i class="fas fa-plus"></i>
+                                        Add Background
                                     </button>
 
                                     <b-field label="Active Environment" class="subtitle">

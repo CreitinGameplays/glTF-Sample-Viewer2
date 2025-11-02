@@ -1,4 +1,4 @@
-import { Observable, merge, fromEvent } from "rxjs";
+import { Observable, merge, fromEvent, combineLatest } from "rxjs";
 import {
     map,
     filter,
@@ -68,20 +68,38 @@ class UIModel {
         this.renderEnvEnabled = app.renderEnvChanged.pipe();
         this.blurEnvEnabled = app.blurEnvChanged.pipe();
         this.addEnvironment = app.addEnvironmentChanged.pipe();
+        this.backgroundImage = app.backgroundImageChanged.pipe();
         this.captureCanvas = app.captureCanvas.pipe();
         this.cameraValuesExport = app.cameraExport.pipe();
 
         const initialClearColor = "#303542";
         this.app.clearColor = initialClearColor;
-        this.clearColor = app.colorChanged.pipe(
-            startWith(initialClearColor),
-            map((hex) => /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)),
-            filter((color) => color !== null),
-            map((color) => [
+
+        // colorStream: emits hex color strings (from UI color picker or initial value)
+        const colorStream = merge(app.colorChanged, new Observable((sub) => sub.next(app.clearColor))).pipe(
+            startWith(initialClearColor)
+        );
+
+        // backgroundPresent: emits true when a background image has been provided (so we can make the
+        // clear alpha 0.0) and false otherwise. Start with false.
+        const backgroundPresent = this.backgroundImage.pipe(startWith(null), map((b) => b !== null && b !== undefined));
+
+        // Combine the color hex stream with whether a background image is present, so the clear color
+        // alpha is 0 when a background image is active (allowing the CSS background to show through),
+        // otherwise alpha is 1.0 for opaque clear.
+        this.clearColor = combineLatest([colorStream, backgroundPresent]).pipe(
+            map(([hex, hasBackground]) => {
+                const color = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                if (!color) return null;
+                return { color, hasBackground };
+            }),
+            filter((x) => x !== null),
+            map(({ color, hasBackground }) => [
                 parseInt(color[1], 16) / 255.0,
                 parseInt(color[2], 16) / 255.0,
                 parseInt(color[3], 16) / 255.0,
-                1.0
+                // transparent when background image present
+                hasBackground ? 0.0 : 1.0
             ])
         );
 
@@ -163,6 +181,14 @@ class UIModel {
                 hdr_path: hdrPath
             };
             this.app.selectedEnvironment = hdrPath.name;
+        });
+
+        this.backgroundImage.subscribe(background => {
+            const canvas = document.getElementById("canvas");
+            const url = URL.createObjectURL(background.file);
+            canvas.style.backgroundImage = `url('${url}')`;
+            canvas.style.backgroundSize = "cover";
+            canvas.style.backgroundPosition = "center";
         });
 
         this.variant = app.variantChanged.pipe();

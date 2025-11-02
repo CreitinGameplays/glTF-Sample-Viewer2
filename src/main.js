@@ -10,8 +10,10 @@ import { validateBytes } from "gltf-validator";
 
 export default async () => {
     const canvas = document.getElementById("canvas");
+    // Create the WebGL context with alpha:true so the canvas can be composited over CSS backgrounds
+    // (we'll make the renderer clear with a transparent alpha when a background image is set).
     const context = canvas.getContext("webgl2", {
-        alpha: false,
+        alpha: true,
         antialias: true
     });
     const view = new GltfView(context);
