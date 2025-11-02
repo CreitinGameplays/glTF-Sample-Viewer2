@@ -2,7 +2,7 @@
 
 [![](../assets/images/BoomBox.jpg)](https://github.khronos.org/glTF-Sample-Viewer-Release/)
 
-This is the official [Khronos glTF 2.0](https://www.khronos.org/gltf/) Sample Viewer using [WebGL 2.0](https://www.khronos.org/webgl/):
+This is a fork of the [https://github.com/KhronosGroup/glTF-Sample-Viewer](https://github.com/KhronosGroup/glTF-Sample-Viewer) repository!
 
 # Viewer
 
